@@ -9,7 +9,7 @@ const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 20;
 
 export async function GET(request: NextRequest) {
-  const auth = await requireRole([ROLES.ADMIN]);
+  const auth = await requireRole([ROLES.CLINIC_ADMIN]);
   if (!auth) {
     return sendError("Forbidden", 403);
   }
@@ -57,4 +57,3 @@ export async function GET(request: NextRequest) {
     headers: { "Content-Type": "application/json" },
   });
 }
-

@@ -16,6 +16,11 @@
 ```
 supabase/migrations/
   20250308000001_init_schema.sql
+  20260314090000_refactor_profile_roles.sql
+  20260314103000_create_patients_table.sql
+  20260314112000_create_studies_table.sql
+  20260314120000_create_study_types_table.sql
+  20260314121000_migrate_study_types.sql
 ```
 
 Format: `YYYYMMDDHHMMSS_<description>.sql`
@@ -30,7 +35,7 @@ Format: `YYYYMMDDHHMMSS_<description>.sql`
 | `updated_at` | `timestamptz` | Managed by trigger     |
 
 - All tables live in the `public` schema.
-- Enum-like columns use `text` with a `check` constraint.
+- Role values use a PostgreSQL enum type: `public.app_role`.
 
 ---
 
@@ -46,7 +51,7 @@ Stores app-level user data including role for RBAC. Row is created on sign-up vi
 | email       | text         |                                |
 | full_name   | text         |                                |
 | avatar_url  | text         |                                |
-| role        | text         | admin / user; default 'user'   |
+| role        | app_role     | clinic_admin / radiologist; default 'clinic_admin' |
 | created_at  | timestamptz  |                                |
 | updated_at  | timestamptz  |                                |
 
@@ -63,12 +68,52 @@ Demo entity for dashboard content. Users can CRUD own items; admins can CRUD any
 | created_at  | timestamptz  |                          |
 | updated_at  | timestamptz  |                          |
 
+### `patients`
+
+Stores patient records used as the base entity for studies and scan uploads.
+
+| Column      | Type         | Notes                                |
+| ----------- | ------------ | ------------------------------------ |
+| id          | uuid         | PK, default `gen_random_uuid()`      |
+| name        | text         | not null                             |
+| age         | integer      | not null, check `age >= 0`           |
+| gender      | text         | `male` / `female` / `other`          |
+| created_by  | uuid         | FK auth.users                        |
+| created_at  | timestamptz  | default `now()`                      |
+
+### `studies`
+
+Stores imaging studies linked to patients.
+
+| Column      | Type         | Notes                                     |
+| ----------- | ------------ | ----------------------------------------- |
+| id          | uuid         | PK, default `gen_random_uuid()`           |
+| patient_id  | uuid         | FK to `patients.id`                       |
+| study_type_id | uuid       | FK to `study_types.id`                    |
+| description | text         | optional                                 |
+| created_by  | uuid         | FK auth.users                             |
+| created_at  | timestamptz  | default `now()`                           |
+
+### `study_types`
+
+Stores study type options used when creating studies.
+
+| Column      | Type         | Notes                         |
+| ----------- | ------------ | ----------------------------- |
+| id          | uuid         | PK, default `gen_random_uuid()` |
+| name        | text         | unique                        |
+| created_by  | uuid         | FK auth.users                 |
+| created_at  | timestamptz  | default `now()`               |
+
 ---
 
 ## Row Level Security
 
 - **profiles:** Authenticated users can select all (for display); insert/update only own row.
-- **items:** Authenticated users can select all; insert with `created_by = auth.uid()`; update/delete own or (for admins) any. See migration file for full policies.
+- **items:** Authenticated users can select all; insert with `created_by = auth.uid()`; update/delete own or (for clinic admins) any. See migration file for full policies.
+- **patients:** `clinic_admin` and `radiologist` can select; only `clinic_admin` can insert with `created_by = auth.uid()`.
+- **studies:** `clinic_admin` and `radiologist` can select; only `clinic_admin` can insert/update/delete.
+- **study_types:** `clinic_admin` and `radiologist` can select; only `clinic_admin` can insert/update/delete.
 
 ---
 

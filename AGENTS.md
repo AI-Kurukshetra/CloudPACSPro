@@ -75,20 +75,83 @@ COMMANDS.md     # reusable agent commands
 
 ## 5. Auth & RBAC (what to use)
 
-- **Roles & storage**
-  - Roles: `admin`, `user`, stored on `profiles.role` (see `src/constants/roles.ts` and `docs/database.md`).
-- **Route protection**
-  | Path pattern | Allowed roles |
-  | -------------- | --------------- |
-  | `/dashboard/*` | admin, user |
-  | `/admin/*` | admin |
-  | `/profile/*` | admin, user |
-- **Server helpers** (from `@/lib/auth`)
-  - `requireAuth()` → ensures a session; returns `{ user, profile }` or `null`.
-  - `requireRole(allowedRoles)` → ensures role membership; returns same shape or `null`.
-- **Frontend**
-  - `useCurrentUser()` and `useRole()` hooks for user + role.
-  - `RoleGuard` component and role-aware nav for conditional UI.
+Roles are stored in `profiles.role`.
+
+Roles:
+
+* `clinic_admin`
+* `radiologist`
+
+### Responsibilities
+
+clinic_admin
+
+* manage patients
+* upload scans
+* manage studies
+* view reports
+
+radiologist
+
+* view studies
+* view scan images
+* create and edit reports
+
+---
+
+### Route Protection
+
+| Path pattern          | Allowed roles             |
+| --------------------- | ------------------------- |
+| `/dashboard/*`        | clinic_admin, radiologist |
+| `/dashboard/patients` | clinic_admin              |
+| `/dashboard/upload`   | clinic_admin              |
+| `/dashboard/studies`  | clinic_admin, radiologist |
+| `/dashboard/reports`  | radiologist               |
+
+---
+
+### Server Helpers
+
+From `@/lib/auth`
+
+requireAuth()
+
+Ensures a session exists.
+
+requireRole(allowedRoles)
+
+Ensures the user role is allowed.
+
+---
+
+### Frontend Hooks
+
+useCurrentUser()
+
+Returns authenticated user.
+
+useRole()
+
+Returns role from profile.
+
+---
+
+### UI Access
+
+clinic_admin sidebar
+
+* Dashboard
+* Patients
+* Upload Scan
+* Studies
+
+radiologist sidebar
+
+* Dashboard
+* Studies
+* Reports
+
 
 ---
 

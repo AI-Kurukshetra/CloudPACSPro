@@ -1,3 +1,6 @@
+import type { Role } from "@/constants/roles";
+import type { Patient, Study, StudyType } from "@/types/database";
+
 /**
  * Standard API response types. All success responses use ApiSuccess<T>;
  * all error responses use ApiErrorPayload (in JSON body) and appropriate HTTP status.
@@ -51,7 +54,7 @@ export interface CurrentUserProfile {
     id: string;
     full_name: string | null;
     avatar_url: string | null;
-    role: string;
+    role: Role;
   } | null;
 }
 
@@ -61,6 +64,12 @@ export interface UserListItem {
   email: string | null;
   full_name: string | null;
   avatar_url: string | null;
-  role: string;
+  role: Role;
   created_at: string;
 }
+
+export type PatientListItem = Patient;
+
+export type StudyListItem = Study;
+
+export type StudyTypeListItem = StudyType;

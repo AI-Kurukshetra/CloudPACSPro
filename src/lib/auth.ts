@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Role } from "@/constants/roles";
+import { ROLES, type Role } from "@/constants/roles";
 
 export async function getProfile(userId: string) {
   const supabase = await createClient();
@@ -31,7 +31,16 @@ export async function requireAuth() {
 export async function requireRole(allowedRoles: Role[]) {
   const data = await requireAuth();
   if (!data) return null;
-  const role = (data.profile?.role ?? "user") as Role;
+  const role = (data.profile?.role ?? ROLES.CLINIC_ADMIN) as Role;
   if (!allowedRoles.includes(role)) return null;
   return data;
+}
+
+export async function getCurrentUserRole(): Promise<Role | null> {
+  const { user, profile } = await getCurrentUserWithProfile();
+  if (!user || !profile?.role) {
+    return null;
+  }
+
+  return profile.role as Role;
 }

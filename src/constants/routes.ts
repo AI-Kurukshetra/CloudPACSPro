@@ -4,10 +4,10 @@ export const ROUTES = {
   SIGN_UP: "/auth/sign-up",
   EMAIL_VERIFIED: "/auth/email-verified",
   DASHBOARD: "/dashboard",
-  DASHBOARD_TABLE: "/dashboard/table",
-  ADMIN: "/admin",
+  DASHBOARD_PATIENTS: "/dashboard/patients",
+  DASHBOARD_STUDIES: "/dashboard/studies",
+  DASHBOARD_STUDY_TYPES: "/dashboard/study-types",
   PROFILE: "/profile",
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;
-

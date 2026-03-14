@@ -42,10 +42,10 @@ export function ItemRow({ item, showActions }: ItemRowProps) {
     },
   });
 
-  const isAdmin = currentUser?.profile?.role === ROLES.ADMIN;
+  const isClinicAdmin = currentUser?.profile?.role === ROLES.CLINIC_ADMIN;
   const isOwner =
     currentUser?.user?.id != null && item.created_by === currentUser.user.id;
-  const canEdit = showActions === "all" ? isAdmin : isOwner;
+  const canEdit = showActions === "all" ? isClinicAdmin : isOwner;
 
   const { mutateAsync: updateItem, isPending: isUpdating } = useMutation({
     mutationFn: async (values: ItemFormValues) => {

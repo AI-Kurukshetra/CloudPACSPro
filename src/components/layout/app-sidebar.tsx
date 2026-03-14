@@ -33,9 +33,7 @@ export function AppSidebar({ userRole, collapsed, onToggle }: AppSidebarProps) {
       <div className="flex flex-1 flex-col gap-1 overflow-hidden p-2">
         {mainItems.map((item) => {
           const Icon = item.icon;
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/" && pathname.startsWith(item.href));
+          const isActive = pathname === item.href;
           return (
             <Link
               key={item.href + item.label}

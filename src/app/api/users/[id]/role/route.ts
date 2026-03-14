@@ -9,7 +9,7 @@ import type { Profile } from "@/types/database";
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
-  const auth = await requireRole([ROLES.ADMIN]);
+  const auth = await requireRole([ROLES.CLINIC_ADMIN]);
   if (!auth) {
     return sendError("Forbidden", 403);
   }
@@ -50,4 +50,3 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     message: "User role updated.",
   });
 }
-

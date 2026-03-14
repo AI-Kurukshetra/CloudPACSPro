@@ -2,9 +2,10 @@ import type { Role } from "@/constants/roles";
 import { ROUTES } from "@/constants/routes";
 import {
   LayoutDashboard,
-  Shield,
   Home,
-  Table2,
+  Users,
+  FolderKanban,
+  Tags,
   User,
 } from "lucide-react";
 
@@ -18,38 +19,38 @@ export interface NavItem {
 
 /**
  * Sidebar navigation config. Items are shown when user's role is in `roles`.
- * Omit `roles` to show to everyone (admin + user).
+ * Omit `roles` to show to everyone (clinic_admin + radiologist).
  */
 export const sidebarNav: NavItem[] = [
   {
     label: "Home",
     href: ROUTES.HOME,
     icon: Home,
-    roles: ["admin", "user"],
+    roles: ["clinic_admin", "radiologist"],
   },
   {
     label: "Dashboard",
     href: ROUTES.DASHBOARD,
     icon: LayoutDashboard,
-    roles: ["admin", "user"],
+    roles: ["clinic_admin", "radiologist"],
   },
   {
-    label: "Table",
-    href: ROUTES.DASHBOARD_TABLE,
-    icon: Table2,
-    roles: ["admin", "user"],
+    label: "Patients",
+    href: ROUTES.DASHBOARD_PATIENTS,
+    icon: Users,
+    roles: ["clinic_admin"],
   },
   {
-    label: "Admin",
-    href: ROUTES.ADMIN,
-    icon: Shield,
-    roles: ["admin"],
+    label: "Studies",
+    href: ROUTES.DASHBOARD_STUDIES,
+    icon: FolderKanban,
+    roles: ["clinic_admin"],
   },
   {
-    label: "Users",
-    href: `${ROUTES.ADMIN}/users`,
-    icon: Shield,
-    roles: ["admin"],
+    label: "Study Types",
+    href: ROUTES.DASHBOARD_STUDY_TYPES,
+    icon: Tags,
+    roles: ["clinic_admin"],
   },
 ];
 
@@ -58,7 +59,7 @@ export const sidebarNavFooter: NavItem[] = [
     label: "Profile",
     href: ROUTES.PROFILE,
     icon: User,
-    roles: ["admin", "user"],
+    roles: ["clinic_admin", "radiologist"],
   },
 ];
 

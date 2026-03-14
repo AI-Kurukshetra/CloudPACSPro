@@ -13,18 +13,29 @@ const pathSegments: Record<string, BreadcrumbSegment[]> = {
   "/dashboard": [
     { label: "Dashboard", href: "/dashboard" },
   ],
-  "/dashboard/table": [
+  "/dashboard/patients": [
     { label: "Dashboard", href: "/dashboard" },
-    { label: "Table" },
+    { label: "Patients" },
   ],
-  "/admin": [
+  "/dashboard/studies": [
     { label: "Dashboard", href: "/dashboard" },
-    { label: "Admin" },
+    { label: "Studies" },
   ],
-  "/admin/users": [
+  "/dashboard/study-types": [
     { label: "Dashboard", href: "/dashboard" },
-    { label: "Admin", href: "/admin" },
-    { label: "Users" },
+    { label: "Study Types" },
+  ],
+  "/dashboard/patients/": [
+    { label: "Dashboard", href: "/dashboard" },
+    { label: "Patients", href: "/dashboard/patients" },
+  ],
+  "/dashboard/studies/": [
+    { label: "Dashboard", href: "/dashboard" },
+    { label: "Studies", href: "/dashboard/studies" },
+  ],
+  "/dashboard/study-types/": [
+    { label: "Dashboard", href: "/dashboard" },
+    { label: "Study Types", href: "/dashboard/study-types" },
   ],
   "/profile": [
     { label: "Dashboard", href: "/dashboard" },
@@ -37,6 +48,21 @@ const pathSegments: Record<string, BreadcrumbSegment[]> = {
  * Matches exact path first, then longest prefix.
  */
 export function getBreadcrumbs(pathname: string): BreadcrumbSegment[] {
+  if (pathname.startsWith("/dashboard/patients/")) {
+    return [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Patients", href: "/dashboard/patients" },
+      { label: "Patient Details" },
+    ];
+  }
+  if (pathname.startsWith("/dashboard/studies/")) {
+    return [
+      { label: "Dashboard", href: "/dashboard" },
+      { label: "Studies", href: "/dashboard/studies" },
+      { label: "Study Details" },
+    ];
+  }
+
   if (pathSegments[pathname]) {
     return pathSegments[pathname];
   }

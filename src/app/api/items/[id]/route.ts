@@ -55,9 +55,9 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     return sendError("Item not found", 404);
   }
 
-  const isAdmin = auth.profile?.role === ROLES.ADMIN;
+  const isClinicAdmin = auth.profile?.role === ROLES.CLINIC_ADMIN;
   const isOwner = (existing as { created_by: string }).created_by === auth.user.id;
-  if (!isAdmin && !isOwner) {
+  if (!isClinicAdmin && !isOwner) {
     return sendError("Forbidden", 403);
   }
 
@@ -97,9 +97,9 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     return sendError("Item not found", 404);
   }
 
-  const isAdmin = auth.profile?.role === ROLES.ADMIN;
+  const isClinicAdmin = auth.profile?.role === ROLES.CLINIC_ADMIN;
   const isOwner = (existing as { created_by: string }).created_by === auth.user.id;
-  if (!isAdmin && !isOwner) {
+  if (!isClinicAdmin && !isOwner) {
     return sendError("Forbidden", 403);
   }
 

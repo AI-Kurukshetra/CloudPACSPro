@@ -50,14 +50,13 @@ export function RoleSelect({ userId, currentRole }: RoleSelectProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => void handleChange(ROLES.ADMIN)}>
-          Admin
+        <DropdownMenuItem onClick={() => void handleChange(ROLES.CLINIC_ADMIN)}>
+          Clinic Admin
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => void handleChange(ROLES.USER)}>
-          User
+        <DropdownMenuItem onClick={() => void handleChange(ROLES.RADIOLOGIST)}>
+          Radiologist
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
-
