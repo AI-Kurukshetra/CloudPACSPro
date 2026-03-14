@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAuth, requireRole } from "@/lib/auth";
 import { ROLES } from "@/constants/roles";
 import { sendSuccess, sendError } from "@/lib/utils/api";
-import { updateStudySchema } from "@/types/schemas";
+import { studyUpdateSchema } from "@/types/schemas";
 import type { Study } from "@/types/database";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -18,7 +18,9 @@ export async function GET(_request: NextRequest, context: RouteContext) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("studies")
-    .select("id, patient_id, study_type_id, description, created_by, created_at, study_types(name)")
+    .select(
+      "id, patient_id, study_type_id, description, created_by, created_at, assigned_to, status, study_types(name), profiles:profiles!studies_assigned_to_fkey(full_name,email)"
+    )
     .eq("id", id)
     .single();
 
@@ -35,6 +37,12 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       data && "study_types" in data && data.study_types && typeof data.study_types === "object"
         ? (data.study_types as { name?: string | null }).name ?? null
         : null,
+    assigned_to_name:
+      data && "profiles" in data && data.profiles && typeof data.profiles === "object"
+        ? (data.profiles as { full_name?: string | null; email?: string | null }).full_name ??
+          (data.profiles as { full_name?: string | null; email?: string | null }).email ??
+          null
+        : null,
   };
 
   return sendSuccess<Study>(shaped as Study);
@@ -47,7 +55,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   }
 
   const { id } = await context.params;
-  const parsed = updateStudySchema.safeParse(await request.json());
+  const parsed = studyUpdateSchema.safeParse(await request.json());
   if (!parsed.success) {
     return sendError("Validation failed", 400, parsed.error.flatten());
   }
@@ -58,14 +66,42 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   }
 
   const supabase = await createClient();
+  const { data: existing, error: fetchError } = await supabase
+    .from("studies")
+    .select("id, status")
+    .eq("id", id)
+    .single();
+
+  if (fetchError || !existing) {
+    return sendError("Study not found", 404);
+  }
+
+  if (update.status) {
+    const currentStatus = (existing as { status: Study["status"] }).status;
+    const nextStatus = update.status;
+    const isValidTransition =
+      (currentStatus === "pending" && nextStatus === "in_review") ||
+      (currentStatus === "in_review" && nextStatus === "completed") ||
+      (currentStatus === "completed" && nextStatus === "in_review") ||
+      currentStatus === nextStatus;
+
+    if (!isValidTransition) {
+      return sendError("Invalid status transition", 400);
+    }
+  }
+
+  const updateData = {
+    ...update,
+    ...(update.description !== undefined
+      ? { description: update.description.trim() || null }
+      : {}),
+  };
+
   const { data, error } = await supabase
     .from("studies")
-    .update({
-      ...update,
-      description: update.description?.trim() ?? null,
-    })
+    .update(updateData)
     .eq("id", id)
-    .select("id, patient_id, study_type_id, description, created_by, created_at")
+    .select("id, patient_id, study_type_id, description, created_by, created_at, assigned_to, status")
     .single();
 
   if (error) {

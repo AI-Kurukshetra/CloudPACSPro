@@ -8,6 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -99,19 +106,28 @@ export function CreateStudyForm({ patientId }: CreateStudyFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="study-type">Study type</Label>
-            <select
-              id="study-type"
-              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-              disabled={isPending || typesLoading}
-              {...form.register("study_type_id")}
-            >
-              <option value="">Select a study type</option>
-              {(studyTypes ?? []).map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.name}
-                </option>
-              ))}
-            </select>
+            <Controller
+              control={form.control}
+              name="study_type_id"
+              render={({ field }) => (
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={isPending || typesLoading}
+                >
+                  <SelectTrigger id="study-type" className="w-full">
+                    <SelectValue placeholder="Select a study type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(studyTypes ?? []).map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
             {form.formState.errors.study_type_id && (
               <p className="text-sm text-destructive">
                 {form.formState.errors.study_type_id.message}

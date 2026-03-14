@@ -11,6 +11,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { DataGridColumnDef, DataGridFilterOption } from "./types";
 
@@ -90,20 +97,26 @@ export function DataGridHeader<TData>({ headerGroups, columns }: DataGridHeaderP
                       {hasFilter && (
                         <div className="min-w-0">
                           {isSelectFilter ? (
-                            <select
-                              className="h-9 w-full min-w-0 rounded-md border border-input bg-background px-3 py-1.5 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                              value={(header.column.getFilterValue() as string) ?? ""}
-                              onChange={(e) =>
-                                header.column.setFilterValue(e.target.value || undefined)
+                            <Select
+                              value={(header.column.getFilterValue() as string) ?? "__all__"}
+                              onValueChange={(value) =>
+                                header.column.setFilterValue(
+                                  value === "__all__" ? undefined : value
+                                )
                               }
                             >
-                              <option value="">All</option>
-                              {(colDef.filterOptions as DataGridFilterOption[]).map((opt) => (
-                                <option key={opt.value} value={opt.value}>
-                                  {opt.label}
-                                </option>
-                              ))}
-                            </select>
+                              <SelectTrigger className="w-full min-w-0 h-9">
+                                <SelectValue placeholder="All" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="__all__">All</SelectItem>
+                                {(colDef.filterOptions as DataGridFilterOption[]).map((opt) => (
+                                  <SelectItem key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           ) : (
                             <Input
                               placeholder="Filter..."

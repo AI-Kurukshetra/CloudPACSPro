@@ -15,8 +15,25 @@ export async function GET(request: NextRequest) {
   }
 
   const url = new URL(request.url);
+  const roleParam = url.searchParams.get("role");
   const pageParam = url.searchParams.get("page");
   const limitParam = url.searchParams.get("limit");
+
+  if (roleParam) {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, full_name, email, role, is_active, created_at")
+      .eq("role", roleParam)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return sendError(error.message, 500);
+    }
+
+    return sendSuccess(data ?? []);
+  }
 
   const page = Math.max(Number(pageParam) || DEFAULT_PAGE, 1);
   const limit = Math.max(Number(limitParam) || DEFAULT_LIMIT, 1);

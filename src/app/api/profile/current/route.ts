@@ -1,14 +1,14 @@
-import { getCurrentUserWithProfile } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import { sendSuccess, sendError } from "@/lib/utils/api";
 import type { CurrentUserProfile } from "@/types/api";
 
 export async function GET() {
-  const { user, profile } = await getCurrentUserWithProfile();
-
-  if (!user) {
+  const auth = await requireAuth();
+  if (!auth) {
     return sendError("Unauthorized", 401);
   }
 
+  const { user, profile } = auth;
   return sendSuccess<CurrentUserProfile>({
     user: { id: user.id, email: user.email ?? null },
     profile: profile

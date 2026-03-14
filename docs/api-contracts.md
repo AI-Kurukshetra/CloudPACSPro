@@ -122,7 +122,7 @@ Update an item. Caller must be owner or clinic admin.
 **Errors**
 | Status | Meaning |
 |--------|---------|
-| 400 | Validation failed |
+| 400 | Validation failed / Invalid status transition |
 | 401 | Not authenticated |
 | 403 | Forbidden (not owner or clinic admin) |
 | 404 | Item not found |
@@ -391,6 +391,8 @@ Returns all studies ordered by `created_at` desc.
 
 Optional query param:
 - `patientId` to filter studies for a patient
+- `status` to filter by status (`pending`, `in_review`, `completed`)
+- `modality` to filter by modality (`XRAY`, `CT`, `MRI`, `US`)
 
 Auth:
 - Requires authenticated user.
@@ -409,7 +411,11 @@ Auth:
       "created_by": "uuid",
       "created_at": "ISO8601",
       "patient_name": "string | null",
-      "study_type_name": "string | null"
+      "study_type_name": "string | null",
+      "report_count": "number",
+      "assigned_to": "uuid | null",
+      "assigned_to_name": "string | null",
+      "status": "pending | in_review | completed"
     }
   ]
 }
@@ -449,7 +455,9 @@ Auth:
     "study_type_id": "uuid",
     "description": "string | null",
     "created_by": "uuid",
-    "created_at": "ISO8601"
+    "created_at": "ISO8601",
+    "assigned_to": "uuid | null",
+    "status": "pending | in_review | completed"
   },
   "message": "Study created."
 }
@@ -483,7 +491,10 @@ Auth:
     "description": "string | null",
     "created_by": "uuid",
     "created_at": "ISO8601",
-    "study_type_name": "string | null"
+    "study_type_name": "string | null",
+    "assigned_to": "uuid | null",
+    "assigned_to_name": "string | null",
+    "status": "pending | in_review | completed"
   }
 }
 ```
@@ -509,7 +520,9 @@ Auth:
 {
   "patient_id": "uuid (optional)",
   "study_type_id": "uuid (optional)",
-  "description": "string (optional)"
+  "description": "string (optional)",
+  "assigned_to": "uuid | null (optional)",
+  "status": "pending | in_review | completed (optional)"
 }
 ```
 
@@ -523,7 +536,9 @@ Auth:
     "study_type_id": "uuid",
     "description": "string | null",
     "created_by": "uuid",
-    "created_at": "ISO8601"
+    "created_at": "ISO8601",
+    "assigned_to": "uuid | null",
+    "status": "pending | in_review | completed"
   },
   "message": "Study updated."
 }
@@ -560,6 +575,336 @@ Auth:
 |--------|---------|
 | 403 | Forbidden |
 | 404 | Study not found |
+| 500 | Server error |
+
+---
+
+## Scan Images
+
+All scan routes are nested under a study. Storage is private; clients must use signed URLs.
+
+### `GET /api/studies/:id/scans`
+
+Returns scan metadata for a study (no storage path or URL).
+
+Auth:
+- Requires authenticated user.
+- RLS restricts radiologists to scans for assigned studies.
+
+**Response `200`**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "study_id": "uuid",
+      "file_name": "string",
+      "file_size": 123456,
+      "mime_type": "image/jpeg | image/png",
+      "uploaded_by": "uuid | null",
+      "created_at": "ISO8601"
+    }
+  ]
+}
+```
+
+**Errors**
+| Status | Meaning |
+|--------|---------|
+| 401 | Not authenticated |
+| 500 | Server error |
+
+---
+
+### `POST /api/studies/:id/scans`
+
+Uploads a single scan image. Uses `multipart/form-data` with field name `file`.
+
+Auth:
+- Requires `clinic_admin` role.
+
+**Request**
+```
+Content-Type: multipart/form-data
+file: JPG or PNG (max 10 MB)
+```
+
+**Response `201`**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "study_id": "uuid",
+    "file_name": "string",
+    "file_size": 123456,
+    "mime_type": "image/jpeg | image/png",
+    "uploaded_by": "uuid | null",
+    "created_at": "ISO8601"
+  },
+  "message": "Scan uploaded."
+}
+```
+
+**Errors**
+| Status | Meaning |
+|--------|---------|
+| 400 | Validation failed (file type/size) |
+| 403 | Forbidden |
+| 404 | Study not found |
+| 500 | Server error |
+
+---
+
+### `DELETE /api/studies/:id/scans/:imageId`
+
+Deletes a scan image from storage and metadata table.
+
+Auth:
+- Requires `clinic_admin` role.
+
+**Response `200`**
+```json
+{
+  "success": true,
+  "data": null,
+  "message": "Deleted."
+}
+```
+
+**Errors**
+| Status | Meaning |
+|--------|---------|
+| 403 | Forbidden |
+| 404 | Scan not found |
+| 500 | Server error |
+
+---
+
+### `GET /api/studies/:id/scans/:imageId/signed-url`
+
+Returns a short-lived signed URL for a scan image.
+
+Auth:
+- Requires authenticated user.
+
+**Response `200`**
+```json
+{
+  "success": true,
+  "data": {
+    "url": "https://...",
+    "expiresAt": "ISO8601"
+  }
+}
+```
+
+**Errors**
+| Status | Meaning |
+|--------|---------|
+| 401 | Not authenticated |
+| 404 | Scan not found |
+| 500 | Server error |
+
+---
+
+## Reports
+
+### `GET /api/studies/:id/report`
+
+Returns the report for a study, or `null` if none exists yet.
+
+Auth:
+- Requires authenticated user.
+
+**Response `200`**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "study_id": "uuid",
+    "author_id": "uuid",
+    "findings": "string",
+    "impression": "string",
+    "created_at": "ISO8601",
+    "updated_at": "ISO8601",
+    "author_name": "string | null",
+    "author_email": "string | null"
+  }
+}
+```
+
+**Response `200`** (no report)
+```json
+{
+  "success": true,
+  "data": null
+}
+```
+
+**Errors**
+| Status | Meaning |
+|--------|---------|
+| 401 | Not authenticated |
+| 500 | Server error |
+
+---
+
+## Dashboard
+
+### `GET /api/dashboard/stats`
+
+Returns radiologist study counts by status.
+
+Auth:
+- Requires `radiologist` role.
+
+**Response `200`**
+```json
+{
+  "success": true,
+  "data": {
+    "pending": 0,
+    "in_review": 0,
+    "completed": 0,
+    "total": 0
+  }
+}
+```
+
+**Errors**
+| Status | Meaning |
+|--------|---------|
+| 403 | Forbidden |
+| 500 | Server error |
+
+---
+
+### `POST /api/reports`
+
+Creates a report for a study. One report per study.
+
+Auth:
+- Requires `radiologist` role.
+
+**Request body**
+```json
+{
+  "study_id": "uuid",
+  "findings": "string (optional)",
+  "impression": "string (optional)"
+}
+```
+
+**Response `201`**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "study_id": "uuid",
+    "author_id": "uuid",
+    "findings": "string",
+    "impression": "string",
+    "created_at": "ISO8601",
+    "updated_at": "ISO8601"
+  },
+  "message": "Report created."
+}
+```
+
+**Errors**
+| Status | Meaning |
+|--------|---------|
+| 400 | Validation failed |
+| 403 | Forbidden (not assigned) |
+| 404 | Study not found |
+| 409 | Report already exists |
+| 500 | Server error |
+
+---
+
+### `PATCH /api/reports/:id`
+
+Updates report findings/impression.
+
+Auth:
+- Requires `radiologist` role.
+
+**Request body**
+```json
+{
+  "findings": "string (optional)",
+  "impression": "string (optional)"
+}
+```
+
+**Response `200`**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "study_id": "uuid",
+    "author_id": "uuid",
+    "findings": "string",
+    "impression": "string",
+    "created_at": "ISO8601",
+    "updated_at": "ISO8601"
+  },
+  "message": "Report updated."
+}
+```
+
+**Errors**
+| Status | Meaning |
+|--------|---------|
+| 400 | Validation failed |
+| 403 | Forbidden |
+| 404 | Report not found |
+| 500 | Server error |
+
+---
+
+### `GET /api/reports`
+
+Returns the current radiologist's reports, joined with study + patient metadata.
+
+Auth:
+- Requires `radiologist` role.
+
+Query params:
+- `modality` (optional): `XRAY | CT | MRI | US`
+
+**Response `200`**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "findings": "string",
+      "impression": "string",
+      "created_at": "ISO8601",
+      "updated_at": "ISO8601",
+      "study": {
+        "id": "uuid",
+        "modality": "XRAY | CT | MRI | US",
+        "study_date": "ISO8601",
+        "status": "pending | in_review | completed",
+        "patient": { "id": "uuid", "full_name": "string" }
+      }
+    }
+  ]
+}
+```
+
+**Errors**
+| Status | Meaning |
+|--------|---------|
+| 403 | Forbidden |
 | 500 | Server error |
 
 ---
@@ -694,6 +1039,72 @@ Auth:
 | 403 | Forbidden |
 | 404 | Study type not found |
 | 409 | Study type is in use |
+| 500 | Server error |
+
+---
+
+## Users
+
+### `GET /api/users`
+
+Returns users. Optional `role` query filters by role (clinic_admin or radiologist).
+
+Auth:
+- Requires `clinic_admin` role.
+
+**Response `200`**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "full_name": "string | null",
+      "email": "string | null",
+      "role": "clinic_admin | radiologist",
+      "created_at": "ISO8601"
+    }
+  ]
+}
+```
+
+**Errors**
+| Status | Meaning |
+|--------|---------|
+| 403 | Forbidden |
+| 500 | Server error |
+
+---
+
+### `POST /api/users/invite`
+
+Invites a user by email with a pre-assigned role.
+
+Auth:
+- Requires `clinic_admin` role.
+
+**Request body**
+```json
+{
+  "email": "string",
+  "full_name": "string",
+  "role": "clinic_admin | radiologist"
+}
+```
+
+**Response `201`**
+```json
+{
+  "success": true,
+  "data": { "message": "Invite sent." }
+}
+```
+
+**Errors**
+| Status | Meaning |
+|--------|---------|
+| 400 | Validation failed / Invite error |
+| 403 | Forbidden |
 | 500 | Server error |
 
 ---

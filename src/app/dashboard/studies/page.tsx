@@ -1,44 +1,16 @@
 "use client";
 
-import { useStudies } from "@/hooks/use-studies";
-import { StudiesTable } from "@/components/dashboard/studies-table";
-import { ItemsTableSkeleton } from "@/components/dashboard/items-table-skeleton";
-import { CreateStudyForm } from "@/components/dashboard/create-study-form";
-import { EmptyState } from "@/components/common/empty-state";
-import { FolderKanban } from "lucide-react";
-import { getErrorMessage } from "@/lib/utils";
+import { useRole } from "@/hooks/use-role";
+import { ROLES } from "@/constants/roles";
+import { AdminStudyList } from "@/components/dashboard/admin-study-list";
+import { RadiologistWorklist } from "@/components/dashboard/radiologist-worklist";
 
 export default function StudiesPage() {
-  const { data: studies, isLoading, isError, error } = useStudies();
+  const { role, isLoading } = useRole();
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">Studies</h1>
-          <p className="text-muted-foreground">
-            Create and manage imaging studies for your patients.
-          </p>
-        </div>
-        <CreateStudyForm />
-      </div>
+  if (isLoading || !role) {
+    return null;
+  }
 
-      {isLoading && <ItemsTableSkeleton />}
-      {isError && (
-        <p className="text-sm text-destructive">
-          {getErrorMessage(error, "Failed to load studies.")}
-        </p>
-      )}
-      {!isLoading && !isError && studies && studies.length === 0 && (
-        <EmptyState
-          icon={FolderKanban}
-          title="No studies found"
-          description="Create your first study to begin organizing scans."
-        />
-      )}
-      {!isLoading && !isError && studies && studies.length > 0 && (
-        <StudiesTable studies={studies} />
-      )}
-    </div>
-  );
+  return role === ROLES.CLINIC_ADMIN ? <AdminStudyList /> : <RadiologistWorklist />;
 }

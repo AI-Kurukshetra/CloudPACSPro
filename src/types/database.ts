@@ -6,6 +6,7 @@ export interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   role: Role;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -34,6 +35,8 @@ export interface Study {
   study_type_id: string;
   description: string | null;
   created_by: string;
+  assigned_to: string | null;
+  status: "pending" | "in_review" | "completed";
   created_at: string;
 }
 
@@ -41,6 +44,27 @@ export interface StudyType {
   id: string;
   name: string;
   created_by: string;
+  created_at: string;
+}
+
+export interface Report {
+  id: string;
+  study_id: string;
+  author_id: string;
+  findings: string;
+  impression: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ScanImageRow {
+  id: string;
+  study_id: string;
+  storage_path: string;
+  file_name: string;
+  file_size: number | null;
+  mime_type: "image/jpeg" | "image/png";
+  uploaded_by: string | null;
   created_at: string;
 }
 
@@ -87,6 +111,23 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Pick<StudyType, "name">>;
+      };
+      reports: {
+        Row: Report;
+        Insert: Omit<Report, "id" | "created_at" | "updated_at"> & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Pick<Report, "findings" | "impression" | "updated_at">>;
+      };
+      scan_images: {
+        Row: ScanImageRow;
+        Insert: Omit<ScanImageRow, "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Pick<ScanImageRow, "file_name" | "file_size" | "mime_type">>;
       };
     };
   };

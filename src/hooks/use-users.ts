@@ -1,9 +1,11 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiGet, apiPatch } from "@/lib/api/client";
+import { apiGet, apiPatch, apiPost } from "@/lib/api/client";
 import { QUERY_KEYS } from "@/constants/query-keys";
-import type { PaginatedResponse, UserListItem } from "@/types/api";
+import type { PaginatedResponse, UserListItem, RadiologistListItem } from "@/types/api";
+import type { Profile } from "@/types/database";
+import type { UserInviteInput } from "@/types/schemas";
 import { getErrorMessage } from "@/lib/utils";
 
 export type UseUsersParams = {
@@ -49,3 +51,31 @@ export function useUpdateUserRole() {
   });
 }
 
+export function useRadiologists() {
+  return useQuery({
+    queryKey: ["users", "radiologists"],
+    queryFn: () => apiGet<RadiologistListItem[]>("/users?role=radiologist"),
+  });
+}
+
+export function useUsersByRole(role: "clinic_admin" | "radiologist") {
+  return useQuery({
+    queryKey: [QUERY_KEYS.users.all, { role }],
+    queryFn: () => apiGet<Profile[]>(`/users?role=${role}`),
+  });
+}
+
+export function useInviteUser() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UserInviteInput) =>
+      apiPost<{ message: string }>("/users/invite", input),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users.all });
+    },
+    onError: (error: unknown) => {
+      // eslint-disable-next-line no-console
+      console.error(getErrorMessage(error));
+    },
+  });
+}

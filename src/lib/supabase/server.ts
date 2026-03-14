@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createServiceClientBase } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
-import { getSupabaseEnv } from "./env";
+import { getSupabaseEnv, getSupabaseServiceEnv } from "./env";
+import type { Database } from "@/types/database";
 
 export async function createClient() {
   const { url, key } = getSupabaseEnv();
@@ -26,4 +28,14 @@ export async function createClient() {
       },
     }
   );
+}
+
+export function createServiceClient() {
+  const { url, serviceKey } = getSupabaseServiceEnv();
+  return createServiceClientBase<Database>(url, serviceKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
 }

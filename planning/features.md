@@ -23,15 +23,20 @@
 | User authentication                     | done    | P0       | Supabase Auth                     |
 | Dashboard shell                         | done    | P0       | Sidebar + layout                  |
 | User profile                            | done    | P1       | Basic profile page                |
-| RBAC roles (clinic_admin / radiologist) | planned | P0       | Replace default roles             |
+| RBAC roles (clinic_admin / radiologist) | done    | P0       | Replace default roles             |
 | Patient management                      | done    | P0       | Create, list, view patients       |
 | Study management                        | done    | P0       | Organize scans by patient         |
 | Study type management                   | done    | P1       | CRUD study types for studies      |
-| Scan upload                             | planned | P0       | Upload images to Supabase Storage |
-| Scan viewer                             | planned | P0       | View scans in browser             |
-| Radiology report editor                 | planned | P0       | Radiologist writes reports        |
-| Study details page                      | planned | P1       | Show scans + report               |
-| Role-based dashboard navigation         | planned | P1       | Different menus for roles         |
+| Study assignment + status               | done    | P1       | Admin assigns radiologists        |
+| Scan upload                             | done    | P0       | Upload images to Supabase Storage |
+| Scan viewer                             | done    | P0       | View scans in browser             |
+| Radiology report editor                 | done    | P0       | Radiologist writes reports        |
+| Reports list (radiologist)              | done    | P1       | Filter and view own reports       |
+| Study details page                      | done    | P1       | Show scans + report               |
+| Role-based dashboard navigation         | done    | P1       | Different menus for roles         |
+| User invite flow                        | done    | P1       | Admin invites users               |
+| Radiologist worklist                    | done    | P1       | Assigned studies with filters     |
+| Radiologist dashboard stats             | done    | P1       | Pending/in_review/completed cards |
 
 ---
 

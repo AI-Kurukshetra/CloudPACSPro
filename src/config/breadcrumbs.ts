@@ -25,6 +25,18 @@ const pathSegments: Record<string, BreadcrumbSegment[]> = {
     { label: "Dashboard", href: "/dashboard" },
     { label: "Study Types" },
   ],
+  "/dashboard/upload": [
+    { label: "Dashboard", href: "/dashboard" },
+    { label: "Upload Scan" },
+  ],
+  "/dashboard/radiologists": [
+    { label: "Dashboard", href: "/dashboard" },
+    { label: "Radiologists" },
+  ],
+  "/dashboard/reports": [
+    { label: "Dashboard", href: "/dashboard" },
+    { label: "Reports" },
+  ],
   "/dashboard/patients/": [
     { label: "Dashboard", href: "/dashboard" },
     { label: "Patients", href: "/dashboard/patients" },

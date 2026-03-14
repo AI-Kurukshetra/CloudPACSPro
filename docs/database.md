@@ -21,6 +21,10 @@ supabase/migrations/
   20260314112000_create_studies_table.sql
   20260314120000_create_study_types_table.sql
   20260314121000_migrate_study_types.sql
+  20260314124000_study_assignment_status.sql
+  20260314130000_profiles_rbac_policies.sql
+  20260314133000_create_scan_images_table.sql
+  20260314140000_create_reports_table.sql
 ```
 
 Format: `YYYYMMDDHHMMSS_<description>.sql`
@@ -52,6 +56,7 @@ Stores app-level user data including role for RBAC. Row is created on sign-up vi
 | full_name   | text         |                                |
 | avatar_url  | text         |                                |
 | role        | app_role     | clinic_admin / radiologist; default 'clinic_admin' |
+| is_active   | boolean      | default true                   |
 | created_at  | timestamptz  |                                |
 | updated_at  | timestamptz  |                                |
 
@@ -92,6 +97,8 @@ Stores imaging studies linked to patients.
 | study_type_id | uuid       | FK to `study_types.id`                    |
 | description | text         | optional                                 |
 | created_by  | uuid         | FK auth.users                             |
+| assigned_to | uuid         | FK to `profiles.id`, nullable             |
+| status      | text         | `pending` / `in_review` / `completed`     |
 | created_at  | timestamptz  | default `now()`                           |
 
 ### `study_types`
@@ -105,14 +112,53 @@ Stores study type options used when creating studies.
 | created_by  | uuid         | FK auth.users                 |
 | created_at  | timestamptz  | default `now()`               |
 
+### `scan_images`
+
+Stores scan image metadata for studies. File blobs live in Supabase Storage.
+
+| Column      | Type         | Notes                                  |
+| ----------- | ------------ | -------------------------------------- |
+| id          | uuid         | PK, default `gen_random_uuid()`        |
+| study_id    | uuid         | FK to `studies.id`, cascade delete     |
+| storage_path| text         | Storage object path (server-only)      |
+| file_name   | text         | original file name                     |
+| file_size   | int          | file size in bytes                     |
+| mime_type   | text         | `image/jpeg` / `image/png`             |
+| uploaded_by | uuid         | FK to `profiles.id`                    |
+| created_at  | timestamptz  | default `now()`                        |
+
+### `reports`
+
+Radiology reports authored by radiologists. One report per study.
+
+| Column      | Type         | Notes                                   |
+| ----------- | ------------ | --------------------------------------- |
+| id          | uuid         | PK, default `gen_random_uuid()`         |
+| study_id    | uuid         | FK to `studies.id`, unique              |
+| author_id   | uuid         | FK to `profiles.id`                     |
+| findings    | text         | default empty string                    |
+| impression  | text         | default empty string                    |
+| created_at  | timestamptz  | default `now()`                         |
+| updated_at  | timestamptz  | default `now()`                         |
+
 ---
 
 ## Row Level Security
 
-- **profiles:** Authenticated users can select all (for display); insert/update only own row.
+- **profiles:** clinic_admin can select all; users can select/insert/update own row.
 - **items:** Authenticated users can select all; insert with `created_by = auth.uid()`; update/delete own or (for clinic admins) any. See migration file for full policies.
 - **patients:** `clinic_admin` and `radiologist` can select; only `clinic_admin` can insert with `created_by = auth.uid()`.
-- **studies:** `clinic_admin` and `radiologist` can select; only `clinic_admin` can insert/update/delete.
+- **studies:** `clinic_admin` can CRUD all; `radiologist` can select only assigned studies.
+- **scan_images:** `clinic_admin` can CRUD all; `radiologist` can select only scans for assigned studies.
+- **reports:** `clinic_admin` can select all; `radiologist` can CRUD own reports and select reports for assigned studies.
+
+---
+
+## Storage
+
+- Bucket: `scan-images` (private)
+- Object path: `{study_id}/{image_id}.{ext}`
+- Signed URLs generated server-side (1 hour TTL).
 - **study_types:** `clinic_admin` and `radiologist` can select; only `clinic_admin` can insert/update/delete.
 
 ---

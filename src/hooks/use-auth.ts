@@ -2,12 +2,12 @@
 
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { getBrowserSupabaseClient } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import { ROUTES } from "@/constants/routes";
 
 export function useAuth() {
   const router = useRouter();
-  const supabase = getBrowserSupabaseClient();
+  const supabase = createClient();
 
   const signIn = useCallback(
     async (email: string, password: string): Promise<void> => {
@@ -63,4 +63,3 @@ export function useAuth() {
 
   return { signIn, signUp, signOut };
 }
-

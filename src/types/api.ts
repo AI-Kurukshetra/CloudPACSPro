@@ -1,5 +1,6 @@
 import type { Role } from "@/constants/roles";
 import type { Patient, Study, StudyType } from "@/types/database";
+import type { ScanImage, Report } from "@/types/schemas";
 
 /**
  * Standard API response types. All success responses use ApiSuccess<T>;
@@ -73,3 +74,37 @@ export type PatientListItem = Patient;
 export type StudyListItem = Study;
 
 export type StudyTypeListItem = StudyType;
+
+export interface RadiologistListItem {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  role: Role;
+}
+
+export type ScanImageListItem = ScanImage;
+
+export interface ScanSignedUrl {
+  url: string;
+  expiresAt: string;
+}
+
+export type ReportDetail = Report & {
+  author_name?: string | null;
+  author_email?: string | null;
+};
+
+export interface ReportListItem {
+  id: string;
+  findings: string;
+  impression: string;
+  created_at: string;
+  updated_at: string;
+  study: {
+    id: string;
+    modality: "XRAY" | "CT" | "MRI" | "US";
+    study_date: string;
+    status: "pending" | "in_review" | "completed";
+    patient: { id: string; full_name: string };
+  };
+}

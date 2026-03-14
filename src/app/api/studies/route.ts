@@ -15,15 +15,34 @@ export async function GET(request: NextRequest) {
 
   const url = new URL(request.url);
   const patientId = url.searchParams.get("patientId");
+  const status = url.searchParams.get("status");
+  const modality = url.searchParams.get("modality");
 
   const supabase = await createClient();
   let query = supabase
     .from("studies")
-    .select("id, patient_id, study_type_id, description, created_by, created_at, patients(name), study_types(name)")
+    .select(
+      "id, patient_id, study_type_id, description, created_by, created_at, assigned_to, status, patients(name), study_types(name), reports(count), profiles:profiles!studies_assigned_to_fkey(full_name,email)"
+    )
     .order("created_at", { ascending: false });
 
   if (patientId) {
     query = query.eq("patient_id", patientId);
+  }
+
+  if (status) {
+    query = query.eq("status", status);
+  }
+
+  if (modality) {
+    const modalityFilter = modality.toUpperCase();
+    const studyTypeName =
+      modalityFilter === "XRAY" || modalityFilter === "X-RAY"
+        ? "X-Ray"
+        : modalityFilter === "US" || modalityFilter === "ULTRASOUND"
+          ? "Ultrasound"
+          : modalityFilter;
+    query = query.ilike("study_types.name", `%${studyTypeName}%`);
   }
 
   const { data, error } = await query;
@@ -40,6 +59,17 @@ export async function GET(request: NextRequest) {
     study_type_name:
       "study_types" in row && row.study_types && typeof row.study_types === "object"
         ? (row.study_types as { name?: string | null }).name ?? null
+        : null,
+    report_count:
+      "reports" in row && Array.isArray(row.reports)
+        ? (row.reports[0] as { count?: number | null }).count ?? 0
+        : 0,
+    assigned_to_name:
+      "profiles" in row && row.profiles && typeof row.profiles === "object"
+        ? (row.profiles as { full_name?: string | null; email?: string | null })
+            .full_name ??
+          (row.profiles as { full_name?: string | null; email?: string | null }).email ??
+          null
         : null,
   }));
 
@@ -66,7 +96,7 @@ export async function POST(request: NextRequest) {
       description: parsed.data.description?.trim() || null,
       created_by: auth.user.id,
     })
-    .select("id, patient_id, study_type_id, description, created_by, created_at")
+    .select("id, patient_id, study_type_id, description, created_by, created_at, assigned_to, status")
     .single();
 
   if (error) {

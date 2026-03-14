@@ -6,6 +6,8 @@ import {
   Users,
   FolderKanban,
   Tags,
+  FileText,
+  Upload,
   User,
 } from "lucide-react";
 
@@ -41,10 +43,28 @@ export const sidebarNav: NavItem[] = [
     roles: ["clinic_admin"],
   },
   {
+    label: "Radiologists",
+    href: ROUTES.DASHBOARD_RADIOLOGISTS,
+    icon: Users,
+    roles: ["clinic_admin"],
+  },
+  {
+    label: "Upload Scan",
+    href: ROUTES.DASHBOARD_UPLOAD,
+    icon: Upload,
+    roles: ["clinic_admin"],
+  },
+  {
     label: "Studies",
     href: ROUTES.DASHBOARD_STUDIES,
     icon: FolderKanban,
-    roles: ["clinic_admin"],
+    roles: ["clinic_admin", "radiologist"],
+  },
+  {
+    label: "Reports",
+    href: ROUTES.DASHBOARD_REPORTS,
+    icon: FileText,
+    roles: ["radiologist"],
   },
   {
     label: "Study Types",

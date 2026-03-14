@@ -4,17 +4,34 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api/client";
 import { QUERY_KEYS } from "@/constants/query-keys";
 import type { Study } from "@/types/database";
-import type { CreateStudyInput, UpdateStudyInput } from "@/types/schemas";
+import type { CreateStudyInput, StudyUpdateInput } from "@/types/schemas";
 
 export type StudyWithPatient = Study & {
   patient_name?: string | null;
   study_type_name?: string | null;
+  assigned_to_name?: string | null;
+  report_count?: number;
 };
 
-export function useStudies() {
+export type StudyFilters = {
+  status?: "pending" | "in_review" | "completed";
+  modality?: "XRAY" | "CT" | "MRI" | "US";
+};
+
+export function useStudies(filters: StudyFilters = {}) {
+  const params = new URLSearchParams();
+  if (filters.status) {
+    params.set("status", filters.status);
+  }
+  if (filters.modality) {
+    params.set("modality", filters.modality);
+  }
+  const query = params.toString();
+  const url = query ? `/studies?${query}` : "/studies";
+
   return useQuery({
-    queryKey: QUERY_KEYS.studies.all,
-    queryFn: () => apiGet<StudyWithPatient[]>("/studies"),
+    queryKey: [QUERY_KEYS.studies.all, filters],
+    queryFn: () => apiGet<StudyWithPatient[]>(url),
   });
 }
 
@@ -53,21 +70,23 @@ export function useCreateStudy(inputPatientId?: string) {
   });
 }
 
-export function useUpdateStudy(studyId: string, patientId?: string) {
+export function useUpdateStudy() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: UpdateStudyInput) => {
-      return apiPatch<Study>(`/studies/${studyId}`, input);
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: StudyUpdateInput;
+    }) => {
+      return apiPatch<Study>(`/studies/${id}`, data);
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.studies.detail(studyId) });
+    onSuccess: async (_, { id }) => {
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.studies.detail(id) });
       await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.studies.all });
-      if (patientId) {
-        await queryClient.invalidateQueries({
-          queryKey: QUERY_KEYS.studies.byPatient(patientId),
-        });
-      }
+      await queryClient.invalidateQueries({ queryKey: ["studies", "patient"] });
     },
   });
 }

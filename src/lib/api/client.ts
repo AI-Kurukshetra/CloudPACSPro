@@ -81,6 +81,19 @@ export async function apiPost<T>(url: string, body?: unknown, config?: ApiReques
   return unwrap(res);
 }
 
+export async function apiPostForm<T>(
+  url: string,
+  body: FormData,
+  config?: ApiRequestConfig
+): Promise<T> {
+  const res = await apiClient.postForm<ApiSuccess<T>>(
+    url,
+    body,
+    config as AxiosRequestConfig
+  );
+  return unwrap(res);
+}
+
 export async function apiPut<T>(url: string, body?: unknown, config?: ApiRequestConfig): Promise<T> {
   const res = await apiClient.put<ApiSuccess<T>>(url, body, config as AxiosRequestConfig);
   return unwrap(res);

@@ -8,6 +8,12 @@ export const createStudySchema = z.object({
 
 export type CreateStudyInput = z.infer<typeof createStudySchema>;
 
-export const updateStudySchema = createStudySchema.partial();
+export const studyUpdateSchema = z.object({
+  assigned_to: z.string().uuid().nullable().optional(),
+  status: z.enum(["pending", "in_review", "completed"]).optional(),
+  description: z.string().trim().max(500).optional(),
+  patient_id: z.string().uuid().optional(),
+  study_type_id: z.string().uuid().optional(),
+});
 
-export type UpdateStudyInput = z.infer<typeof updateStudySchema>;
+export type StudyUpdateInput = z.infer<typeof studyUpdateSchema>;

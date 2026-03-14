@@ -6,8 +6,8 @@
 function getSupabaseEnv() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim();
 
   if (!url?.trim() || !key) {
     throw new Error(
@@ -20,4 +20,17 @@ function getSupabaseEnv() {
   return { url, key };
 }
 
-export { getSupabaseEnv };
+function getSupabaseServiceEnv() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+
+  if (!url?.trim() || !serviceKey) {
+    throw new Error(
+      "Missing Supabase env: set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local."
+    );
+  }
+
+  return { url, serviceKey };
+}
+
+export { getSupabaseEnv, getSupabaseServiceEnv };
