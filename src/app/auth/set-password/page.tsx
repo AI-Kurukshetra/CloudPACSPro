@@ -54,9 +54,15 @@ export default function SetPasswordPage() {
     };
   }, [supabase]);
 
+  const PageShell = ({ children }: { children: React.ReactNode }) => (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      <div className="w-full max-w-md">{children}</div>
+    </div>
+  );
+
   if (hasSession === null) {
     return (
-      <div className="mx-auto flex w-full max-w-md flex-col gap-4">
+      <PageShell>
         <Card>
           <CardHeader>
             <CardTitle>Set your password</CardTitle>
@@ -65,13 +71,13 @@ export default function SetPasswordPage() {
             <p>Checking invite link…</p>
           </CardContent>
         </Card>
-      </div>
+      </PageShell>
     );
   }
 
   if (hasSession === false) {
     return (
-      <div className="mx-auto flex w-full max-w-md flex-col gap-4">
+      <PageShell>
         <Card>
           <CardHeader>
             <CardTitle>Set your password</CardTitle>
@@ -87,12 +93,12 @@ export default function SetPasswordPage() {
             </Button>
           </CardContent>
         </Card>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-4">
+    <PageShell>
       <Card>
         <CardHeader>
           <CardTitle>Set your password</CardTitle>
@@ -153,6 +159,6 @@ export default function SetPasswordPage() {
           </Form>
         </CardContent>
       </Card>
-    </div>
+    </PageShell>
   );
 }
