@@ -52,7 +52,7 @@ function ScanThumbnail({
           <img
             src={data.url}
             alt={`Scan ${index + 1}`}
-            className="h-32 w-full object-cover"
+            className="h-32 w-full cursor-pointer object-cover"
             loading="lazy"
           />
         </button>

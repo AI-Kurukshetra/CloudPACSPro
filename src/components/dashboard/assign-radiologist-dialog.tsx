@@ -76,7 +76,13 @@ export function AssignRadiologistDialog({
               disabled={isLoading || isPending}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a radiologist" />
+                <SelectValue placeholder="Select a radiologist">
+                  {selectedId
+                    ? radiologists?.find((u) => u.id === selectedId)?.full_name ??
+                      radiologists?.find((u) => u.id === selectedId)?.email ??
+                      "Radiologist"
+                    : "Select a radiologist"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__unassigned__">Unassigned</SelectItem>

@@ -8,13 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -23,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { useCreateStudy } from "@/hooks/use-studies";
 import { PatientCombobox } from "@/components/shared/patient-combobox";
+import { StudyTypeSelect } from "@/components/shared/study-type-select";
 import { useStudyTypes } from "@/hooks/use-study-types";
 import Link from "next/link";
 import { createStudySchema, type CreateStudyInput } from "@/types/schemas";
@@ -110,22 +104,12 @@ export function CreateStudyForm({ patientId }: CreateStudyFormProps) {
               control={form.control}
               name="study_type_id"
               render={({ field }) => (
-                <Select
+                <StudyTypeSelect
+                  studyTypes={studyTypes}
                   value={field.value}
-                  onValueChange={field.onChange}
+                  onChange={field.onChange}
                   disabled={isPending || typesLoading}
-                >
-                  <SelectTrigger id="study-type" className="w-full">
-                    <SelectValue placeholder="Select a study type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(studyTypes ?? []).map((type) => (
-                      <SelectItem key={type.id} value={type.id}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                />
               )}
             />
             {form.formState.errors.study_type_id && (
