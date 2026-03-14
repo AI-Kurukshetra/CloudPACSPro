@@ -46,7 +46,7 @@ export default async function HomePage() {
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
         <ContentContainer variant="wide" className="flex items-center justify-between py-4">
           <Link href="/" className="font-display text-xl font-semibold tracking-tight">
-            Clinic Imaging Manager
+            HealthScan
           </Link>
           <div className="flex items-center gap-3">
             <ThemeSwitcher />
@@ -139,7 +139,7 @@ export default async function HomePage() {
       <footer className="border-t border-border/60 bg-background py-6">
         <ContentContainer variant="wide" className="flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Clinic Imaging Manager
+            © {new Date().getFullYear()} HealthScan
           </div>
           <div className="flex gap-4 text-sm text-muted-foreground">
             <Link href="/auth/sign-in" className="hover:text-foreground">

@@ -65,7 +65,7 @@ Also update the **invite email template** (optional but recommended):
 
 ```
 Supabase Dashboard → Authentication → Email Templates → Invite User
-Subject: "You've been invited to Clinic Imaging Manager"
+Subject: "You've been invited to HealthScan"
 Body: include {{ .ConfirmationURL }} as the invite link
 ```
 
@@ -238,7 +238,7 @@ Ensure `createBrowserClient` in `lib/supabase/browser.ts` has `detectSessionInUr
 
 ```
 ┌──────────────────────────────────────┐
-│         Clinic Imaging Manager       │
+│              HealthScan              │
 │                                      │
 │   Welcome! Set your password         │
 │   to complete your account setup.   │

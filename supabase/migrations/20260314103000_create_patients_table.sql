@@ -1,4 +1,4 @@
--- Patients for Clinic Imaging Manager.
+-- Patients for HealthScan.
 
 create table if not exists public.patients (
   id uuid primary key default gen_random_uuid(),

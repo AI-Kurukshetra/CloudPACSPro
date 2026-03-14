@@ -1,6 +1,6 @@
 # Features
 
-> All planned features for the Clinic Imaging Manager product.
+> All planned features for the HealthScan product.
 
 ---
 

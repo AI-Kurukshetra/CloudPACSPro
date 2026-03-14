@@ -2,7 +2,7 @@
 
 ## Product Name
 
-Clinic Imaging Manager
+HealthScan
 
 ---
 
@@ -52,7 +52,7 @@ Target organizations:
 
 ## Value Proposition
 
-Clinic Imaging Manager provides a **lightweight PACS-style workflow** focused on simplicity.
+HealthScan provides a **lightweight PACS-style workflow** focused on simplicity.
 
 Core benefits:
 

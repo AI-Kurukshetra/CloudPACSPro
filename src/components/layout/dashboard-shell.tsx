@@ -34,7 +34,13 @@ export function DashboardShell({ user, profile, children }: DashboardShellProps)
 
   return (
     <div className="flex h-screen min-h-0 w-full overflow-hidden">
-      <AppSidebar userRole={role} collapsed={collapsed} onToggle={toggle} />
+      <AppSidebar
+        userRole={role}
+        collapsed={collapsed}
+        onToggle={toggle}
+        profile={profile}
+        userEmail={user.email ?? null}
+      />
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-background px-4">
           <div className="flex min-w-0 items-center gap-2">

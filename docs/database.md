@@ -60,6 +60,9 @@ Stores app-level user data including role for RBAC. Row is created on sign-up vi
 | created_at  | timestamptz  |                                |
 | updated_at  | timestamptz  |                                |
 
+Avatar storage:
+- Avatars are stored in the `avatars` bucket (public read). `profiles.avatar_url` stores the public URL.
+
 ### `items`
 
 Demo entity for dashboard content. Users can CRUD own items; admins can CRUD any.
@@ -160,6 +163,7 @@ Radiology reports authored by radiologists. One report per study.
 - Object path: `{study_id}/{image_id}.{ext}`
 - Signed URLs generated server-side (1 hour TTL).
 - **study_types:** `clinic_admin` and `radiologist` can select; only `clinic_admin` can insert/update/delete.
+- Bucket: `avatars` (public) for user profile images. Authenticated users can upload/update/delete their own objects; all users can read.
 
 ---
 

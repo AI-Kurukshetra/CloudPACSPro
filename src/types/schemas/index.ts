@@ -6,3 +6,4 @@ export * from "./reports";
 export * from "./studies";
 export * from "./study-types";
 export * from "./users";
+export * from "./profile";

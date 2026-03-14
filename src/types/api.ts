@@ -56,6 +56,7 @@ export interface CurrentUserProfile {
     full_name: string | null;
     avatar_url: string | null;
     role: Role;
+    created_at: string | null;
   } | null;
 }
 

@@ -1,4 +1,4 @@
--- Studies for Clinic Imaging Manager.
+-- Studies for HealthScan.
 
 create table if not exists public.studies (
   id uuid primary key default gen_random_uuid(),

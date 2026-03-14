@@ -17,6 +17,7 @@ export async function GET() {
           full_name: profile.full_name ?? null,
           avatar_url: profile.avatar_url ?? null,
           role: profile.role,
+          created_at: profile.created_at ?? null,
         }
       : null,
   });

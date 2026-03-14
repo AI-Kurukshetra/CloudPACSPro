@@ -1,6 +1,6 @@
 # Build Order — Full App Reference
 
-> Master sequence for building the complete Clinic Imaging Manager.
+> Master sequence for building the complete HealthScan platform.
 > Feed phases to Codex **strictly in this order**. Each phase lists what it depends on.
 > Do not start a phase until all its dependencies are marked done in `planning/features.md`.
 
